@@ -86,23 +86,31 @@ if [[ "$SETENV" -eq "" ]]; then
             ;;
         msys*) 
             echo "OSTYPE = $OSTYPE"
-            export PATH="$PATH:$(query_vars_msys):/c/Users/dengl/AppData/Roaming/MobaXterm/slash/bin/"
+            #export PATH="$PATH:$(query_vars_msys):/c/Users/dengl/AppData/Roaming/MobaXterm/slash/bin/"
+            export PATH="$PATH:$(query_vars_msys)"
             if [ $? != 0 ]
             then
                 echo -e "\n"
                 echo -e "\033[41;36m setting vars fail!!! \033[0m"
                 exit 1
             fi
+            alias xmd=xmd.bat
+            alias xsct=xsct.bat
+            alias xsdb=xsdb.bat
             ;;
         cygwin*) 
             echo "OSTYPE = $OSTYPE"
-            export PATH="$PATH:$(query_vars_cygwin):/cygdrive/c/Users/dengl/AppData/Roaming/MobaXterm/slash/bin/"
+            #export PATH="$PATH:$(query_vars_cygwin):/cygdrive/c/Users/dengl/AppData/Roaming/MobaXterm/slash/bin/"
+            export PATH="$PATH:$(query_vars_cygwin)"
             if [ $? != 0 ]
             then
                 echo -e "\n"
                 echo -e "\033[41;36m setting vars fail!!! \033[0m"
                 exit 1
             fi
+            alias xmd=xmd.bat
+            alias xsct=xsct.bat
+            alias xsdb=xsdb.bat
             ;;
         *) 
             #echo "unknown: $OSTYPE" 
