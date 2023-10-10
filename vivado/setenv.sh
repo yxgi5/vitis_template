@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## assume you have Vivado 2020.1 installed in D:\Xilinx\, which is must
+## assume you have Vivado 2020.1 installed in D:\Xilinx\
 
 # you need one of bash.exe from following way
 ## assume you have msys64 installed in D:\msys64\, offering bash.exe
