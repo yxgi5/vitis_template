@@ -81,8 +81,8 @@ if [[ "$SETENV" -eq "" ]]; then
         
     else
         # Unkown. such as freebsd darwin
-        echo "OSTYPE = $OSTYPE"
-        echo -e "\033[41;36m OSTYPE Unkown \033[0m"
+        # echo "OSTYPE = $OSTYPE"
+        echo -e "\033[41;36m OSTYPE Unkown: $OSTYPE \033[0m"
         exit 1
     fi
     
