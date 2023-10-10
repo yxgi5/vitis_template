@@ -34,7 +34,8 @@ echo -e "\033[42;31mScript ver 0.1.002 \nMake sure the env path is correct befor
 
 if [[ "$SETENV" -eq "" ]]; then
     #echo "yes!"
-    echo SETENV=$SETENV
+    #echo SETENV=$SETENV
+    echo "SETENV has not been set before, setting ..."
 
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         echo "OSTYPE = $OSTYPE"
