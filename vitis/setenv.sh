@@ -83,6 +83,7 @@ if [[ "$SETENV" -eq "" ]]; then
         linux*) 
             echo "OSTYPE = $OSTYPE"
             source /opt/Xilinx/Vitis/2020.1/settings64.sh
+            export SETENV=1
             ;;
         msys*) 
             echo "OSTYPE = $OSTYPE"
@@ -97,6 +98,7 @@ if [[ "$SETENV" -eq "" ]]; then
             alias xmd=xmd.bat
             alias xsct=xsct.bat
             alias xsdb=xsdb.bat
+            export SETENV=1
             ;;
         cygwin*) 
             echo "OSTYPE = $OSTYPE"
@@ -111,6 +113,7 @@ if [[ "$SETENV" -eq "" ]]; then
             alias xmd=xmd.bat
             alias xsct=xsct.bat
             alias xsdb=xsdb.bat
+            export SETENV=1
             ;;
         *) 
             #echo "unknown: $OSTYPE" 
