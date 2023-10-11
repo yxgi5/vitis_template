@@ -249,7 +249,7 @@ if {($src_link == "soft")} {
 #app clean -name ${project_name}
 #Build platform project
 #puts "Build platform project"
-#platform generate
+platform generate
 
 #Build application project
 #sdk projects -build -type app -name ${project_name}_app
