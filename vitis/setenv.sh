@@ -88,7 +88,9 @@ if [[ "$SETENV" -eq "" ]]; then
         msys*) 
             echo "OSTYPE = $OSTYPE"
             #export PATH="$PATH:$(query_vars_msys):/c/Users/dengl/AppData/Roaming/MobaXterm/slash/bin/"
-            export PATH="$PATH:$(query_vars_msys)"
+            #export PATH="$PATH:$(query_vars_msys)"
+            
+            export PATH="/bin:$PATH:/d/Xilinx/Model_Composer/2020.1/bin:/d/Xilinx/Vitis/2020.1/bin:/d/Xilinx/Vitis/2020.1/gnu/microblaze/nt/bin:/d/Xilinx/Vitis/2020.1/gnu/arm/nt/bin:/d/Xilinx/Vitis/2020.1/gnu/microblaze/linux_toolchain/nt64_le/bin:/d/Xilinx/Vitis/2020.1/gnu/aarch32/nt/gcc-arm-linux-gnueabi/bin:/d/Xilinx/Vitis/2020.1/gnu/aarch32/nt/gcc-arm-none-eabi/bin:/d/Xilinx/Vitis/2020.1/gnu/aarch64/nt/aarch64-linux/bin:/d/Xilinx/Vitis/2020.1/gnu/aarch64/nt/aarch64-none/bin:/d/Xilinx/Vitis/2020.1/gnu/armr5/nt/gcc-arm-none-eabi/bin:/d/Xilinx/Vitis/2020.1/tps/win64/cmake-3.3.2/bin:/d/Xilinx/Vitis/2020.1/gnuwin/bin:/d/Xilinx/Vivado/2020.1/bin:/d/Xilinx/Vivado/2020.1/lib/win64.o:/d/Xilinx/DocNav"
             if [ $? != 0 ]
             then
                 echo -e "\n"
@@ -103,7 +105,9 @@ if [[ "$SETENV" -eq "" ]]; then
         cygwin*) 
             echo "OSTYPE = $OSTYPE"
             #export PATH="$PATH:$(query_vars_cygwin):/cygdrive/c/Users/dengl/AppData/Roaming/MobaXterm/slash/bin/"
-            export PATH="$PATH:$(query_vars_cygwin)"
+            #export PATH="$PATH:$(query_vars_cygwin)"
+            
+            export PATH="/bin:$PATH:/cygdrive/d/Xilinx/Model_Composer/2020.1/bin:/cygdrive/d/Xilinx/Vitis/2020.1/bin:/cygdrive/d/Xilinx/Vitis/2020.1/gnu/microblaze/nt/bin:/cygdrive/d/Xilinx/Vitis/2020.1/gnu/arm/nt/bin:/cygdrive/d/Xilinx/Vitis/2020.1/gnu/microblaze/linux_toolchain/nt64_le/bin:/cygdrive/d/Xilinx/Vitis/2020.1/gnu/aarch32/nt/gcc-arm-linux-gnueabi/bin:/cygdrive/d/Xilinx/Vitis/2020.1/gnu/aarch32/nt/gcc-arm-none-eabi/bin:/cygdrive/d/Xilinx/Vitis/2020.1/gnu/aarch64/nt/aarch64-linux/bin:/cygdrive/d/Xilinx/Vitis/2020.1/gnu/aarch64/nt/aarch64-none/bin:/cygdrive/d/Xilinx/Vitis/2020.1/gnu/armr5/nt/gcc-arm-none-eabi/bin:/cygdrive/d/Xilinx/Vitis/2020.1/tps/win64/cmake-3.3.2/bin:/cygdrive/d/Xilinx/Vitis/2020.1/gnuwin/bin:/cygdrive/d/Xilinx/Vivado/2020.1/bin:/cygdrive/d/Xilinx/Vivado/2020.1/lib/win64.o:/cygdrive/d/Xilinx/DocNav"
             if [ $? != 0 ]
             then
                 echo -e "\n"
