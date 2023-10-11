@@ -3,9 +3,10 @@
 ## assume you have Vivado 2020.1 (and Vitis) installed in D:\Xilinx\, which is necessary
 
 # you need one of bash.exe from following way
-## assume you have msys64 installed in D:\msys64\, offering bash.exe
-## assume you have Git installed in C:\Program Files\, offering bash.exe(not git-bash.exe)
-## assume you have cygwin64 installed in D:\cygwin64\, offering bash.exe
+## D:\Xilinx\Vivado\2020.1\tps\win64\git-2.16.2\bin\bash.exe
+## assume you have Git installed in C:\Program Files\, offering bash.exe(* not git-bash.exe, git-bash.exe can work but cannot display xsct output)
+## assume you have cygwin64 installed in D:\cygwin64\, offering bash.exe(* vitis proj build can not generate elf for the first time, build twice)
+## assume you have msys64 installed in D:\msys64\, offering bash.exe(* cmd /c cannot work, so cannot use query_vars_msys() )
 
 # you can get OSTYPE by command `bash -c "echo $OSTYPE"`
 # here is an avilable list and coresponding OS
