@@ -13,8 +13,39 @@ cd ./sdk_workspace/vitis_proj/_ide/bitstream
 #echo "bootgen -arch fpga -image ../flash/bootimage.bif -w -o ../flash/BOOT.bin -interface spi"
 #bootgen -arch fpga -image ../flash/bootimage.bif -w -o ../flash/BOOT.bin -interface spi
 mkdir -p ../bootimage
-echo -e "//arch = zynqmp; split = false; format = BIN\nthe_ROM_image:\n{\n [bootloader, destination_cpu=a53-0] $top/sdk_workspace/system_wrapper/export/system_wrapper/sw/system_wrapper/boot/fsbl.elf\n [destination_device=pl] $top/sdk_workspace/vitis_proj/_ide/bitstream/system_wrapper.bit\n [destination_cpu = a53-0] $top/sdk_workspace/vitis_proj/Debug/vitis_proj.elf\n}\n" > ../bootimage/vitis_proj.bif
-#echo -e "//arch = zynq; split = false; format = BIN\nthe_ROM_image:\n{\n [bootloader] $top/sdk_workspace/system_wrapper/export/system_wrapper/sw/system_wrapper/boot/fsbl.elf\n $top/sdk_workspace/vitis_proj/_ide/bitstream/system_wrapper.bit\n $top/sdk_workspace/vitis_proj/Debug/vitis_proj.elf\n}\n" > ../bootimage/vitis_proj.bif
+
+case "$OSTYPE" in
+linux*) 
+    echo -e "//arch = zynqmp; split = false; format = BIN\nthe_ROM_image:\n{\n [bootloader, destination_cpu=a53-0] $top/sdk_workspace/system_wrapper/export/system_wrapper/sw/system_wrapper/boot/fsbl.elf\n [destination_device=pl] $top/sdk_workspace/vitis_proj/_ide/bitstream/system_wrapper.bit\n [destination_cpu = a53-0] $top/sdk_workspace/vitis_proj/Debug/vitis_proj.elf\n}\n" > ../bootimage/vitis_proj.bif
+    #echo -e "//arch = zynq; split = false; format = BIN\nthe_ROM_image:\n{\n [bootloader] $top/sdk_workspace/system_wrapper/export/system_wrapper/sw/system_wrapper/boot/fsbl.elf\n $top/sdk_workspace/vitis_proj/_ide/bitstream/system_wrapper.bit\n $top/sdk_workspace/vitis_proj/Debug/vitis_proj.elf\n}\n" > ../bootimage/vitis_proj.bif
+    ;;
+msys*) 
+    #FSBLFILE=`cygpath -w ${top}/sdk_workspace/system_wrapper/export/system_wrapper/sw/system_wrapper/boot/fsbl.elf`
+    #FSBLFILE_STR=" [bootloader, destination_cpu=a53-0] ${FSBLFILE}"
+    FSBLFILE="[bootloader, destination_cpu=a53-0] `cygpath -w ${top}/sdk_workspace/system_wrapper/export/system_wrapper/sw/system_wrapper/boot/fsbl.elf`"
+    BITFILE="[destination_device=pl] `cygpath -w ${top}/sdk_workspace/vitis_proj/_ide/bitstream/system_wrapper.bit`"
+    ELFFILE="[destination_cpu = a53-0] `cygpath -w ${top}/sdk_workspace/vitis_proj/Debug/vitis_proj.elf`"
+    #echo -e "//arch = zynqmp; split = false; format = BIN\nthe_ROM_image:\n{\n ${FSBLFILE}\n ${BITFILE}\n ${ELFFILE}\n}\n" > ../bootimage/vitis_proj.bif
+    (echo "//arch = zynqmp; split = false; format = BIN" && echo "the_ROM_image:" && \
+    echo "{" && echo " ${FSBLFILE}" && echo " ${BITFILE}" && echo " ${ELFFILE}" && \
+    echo "}" && echo "") > ../bootimage/vitis_proj.bif
+    ;;
+cygwin*) 
+    FSBLFILE="[bootloader, destination_cpu=a53-0] `cygpath -w ${top}/sdk_workspace/system_wrapper/export/system_wrapper/sw/system_wrapper/boot/fsbl.elf`"
+    BITFILE="[destination_device=pl] `cygpath -w ${top}/sdk_workspace/vitis_proj/_ide/bitstream/system_wrapper.bit`"
+    ELFFILE="[destination_cpu = a53-0] `cygpath -w ${top}/sdk_workspace/vitis_proj/Debug/vitis_proj.elf`"
+    #echo -e "//arch = zynqmp; split = false; format = BIN\nthe_ROM_image:\n{\n ${FSBLFILE}\n ${BITFILE}\n ${ELFFILE}\n}\n" > ../bootimage/vitis_proj.bif
+    (echo "//arch = zynqmp; split = false; format = BIN" && echo "the_ROM_image:" && \
+    echo "{" && echo " ${FSBLFILE}" && echo " ${BITFILE}" && echo " ${ELFFILE}" && \
+    echo "}" && echo "") > ../bootimage/vitis_proj.bif
+    ;;
+*) 
+    echo -e "\033[41;36m OSTYPE Unkown: $OSTYPE \033[0m"
+    exit 1
+    ;;
+esac
+    
+
 bootgen -image ../bootimage/vitis_proj.bif -arch zynqmp -o ../bootimage/BOOT.bin -w on
 #bootgen -image ../bootimage/vitis_proj.bif -arch zynq -o ../bootimage/BOOT.bin -w on 
 
