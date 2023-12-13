@@ -31,11 +31,11 @@ cmd 	是docker容器ubuntu的快捷操作命令
 上面脚本默认zynqmp工程，zynq工程需进行必要修改
 -------------------------------------------------------------------
 
-microblaze ram on chip 工程的post_build脚本，实际用的时候替换
+microblaze ram on chip 工程的post_build脚本，实际用的时候替换有关脚本
 post_build_mb0.sh
 post_build_mb0.bat
 
-microblaze ram on chip 工程的flash脚本，实际用的时候
+microblaze ram on chip 工程的flash脚本，实际用的时候替换有关脚本
 flash_mb0.sh
 flash_mb0.bat
 
