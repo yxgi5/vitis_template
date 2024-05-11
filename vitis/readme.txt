@@ -33,8 +33,17 @@ cmd 	是docker容器ubuntu的快捷操作命令
 
 microblaze ram on chip 工程的脚本带`_mb0`后缀，实际用的时候替换有关脚本
 
+-------------------------------------------------------------------
 
-microblaze ram on ddr 工程的脚本带`_mb1`后缀，实际用的时候替换有关脚本
+microblaze ram on ddr 工程的脚本带`_mb1`后缀，实际用的时候替换有关脚本, 
+/vitis/elf-bootloader-master 是 mb1 需要的 bootloader
+根据 bit+loader 的大小，修改下面几个文件的偏移地址
+/vitis/elf-bootloader-master/lib/sw_apps/elf-bootloader/src/eb-config.h
+/home/andreas/workdir/figkey/pre_research/microblaze/mb/vitis/flash.bat
+/home/andreas/workdir/figkey/pre_research/microblaze/mb/vitis/flash.sh
+/home/andreas/workdir/figkey/pre_research/microblaze/mb/vitis/write_cfgmem.tcl
+
+-------------------------------------------------------------------
 
 
 
