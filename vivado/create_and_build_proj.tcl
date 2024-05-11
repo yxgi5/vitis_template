@@ -5,6 +5,7 @@ set design_name $BD_name
 set ip_repo_path [pwd]/ip_repo
 set ip_cache_path [pwd]/ip_cache
 set current_vivado_version [version -short]
+#set PWD [pwd]
 
 if {[file exists $project_name/$project_name.xpr] == 0 } {
 # Create a new project
@@ -196,6 +197,9 @@ if {[get_property NEEDS_REFRESH [get_runs impl_1]] == 1} {
 #close_design
 #file copy -force xxx xxx.hdf
 #write_hw_platform -fixed -include_bit -force -file ../vitis/xsa/${BD_name}_wrapper.xsa
+open_bd_design [get_files ./$project_name/$project_name.srcs/sources_1/bd/$BD_name/$BD_name.bd]
+write_bd_tcl -force ./system.tcl
+#write_cfgmem -force -format mcs -size 32 -interface SPIx4 -loadbit [subst {up 0x00000000 "${PWD}/vivado_proj/vivado_proj.runs/impl_1/system_wrapper.bit" }] -file "${PWD}/PCIE_XDMA.mcs"
 write_hw_platform -fixed -include_bit -force -file ./${BD_name}_wrapper.xsa
 write_debug_probes -force ./${BD_name}_wrapper.ltx
 close_project
