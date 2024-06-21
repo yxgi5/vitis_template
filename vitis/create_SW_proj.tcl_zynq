@@ -9,10 +9,10 @@
 #puts "Current workspace is $projpath"
 
 #Create the BSP
-set arch 64-bit
-#set arch 32-bit
-set processor_name psu_cortexa53_0
-#set processor_name ps7_cortexa9_0
+#set arch 64-bit
+set arch 32-bit
+#set processor_name psu_cortexa53_0
+set processor_name ps7_cortexa9_0
 #set processor_name microblaze_0
 #set build_type system
 set build_type app
@@ -35,17 +35,6 @@ set platform_name system_wrapper
 #set hardware_name ${hardware_path}/${xsa_name}.xsa
 set hardware_name ${hardware_path}/${platform_name}.xsa
 
-if {[file exists ${project_path}]} {
-    # check that it's a directory
-    if {! [file isdirectory $project_path]} {
-        puts "$project_path exists, but it's a file"
-    } else {
-        setws -switch ${project_path}
-        getws
-        cd ${project_path}
-        platform read ${platform_name}/platform.spr
-    }
-} else {
 # Set SDK Workspace
 setws -switch ${project_path}
 getws
@@ -128,9 +117,14 @@ domain active ${domain_name}
 #bsp config stdin psu_uart_1
 #bsp config stdout psu_uart_1
 
+#domain active {zynq_fsbl}
+#bsp config stdin ps7_uart_0
+#bsp config stdout ps7_uart_0
 domain active ${domain_name}
-bsp config stdin axi_uartlite_0
-bsp config stdout axi_uartlite_0
+bsp config stdin ps7_uart_0
+bsp config stdout ps7_uart_0
+#bsp config stdin axi_uartlite_0
+#bsp config stdout axi_uartlite_0
 #bsp config stdin processer_ss_axi_uartlite_0
 #bsp config stdout processer_ss_axi_uartlite_0
 
@@ -238,49 +232,7 @@ if {($src_link == "soft")} {
     #importsources -name ${project_name} -path [pwd]/src -linker-script 
     importsources -name ${project_name} -path [pwd]/src/${project_name}/src -linker-script
 }
-}
 
 ######
-#exit
-######
-
-#Clean application project
-#sdk projects -clean -type app -name ${project_name}_app
-#app clean -name ${project_name}
-#Build platform project
-#puts "Build platform project"
-platform generate
-
-#Build application project
-#sdk projects -build -type app -name ${project_name}_app
-if {($build_type == "app")} {
-    #puts "Build fsbl project"
-    #app build -name ${bootloader_name}
-    puts "Build app project"
-    #app build -name ${bootloader1_name}
-    #app build -name ${bootloader2_name}
-    #app build -name ${project_name1}
-    #app build -name ${project_name2}
-    app build -name ${project_name}
-} else {
-    #puts "Build fsbl project"
-    #sysproj build -name ${bootloader_name}_system
-    puts "Build system project"
-    #sysproj build -name ${bootloader1_name}_system
-    #sysproj build -name ${bootloader2_name}_system
-    #sysproj build -name ${project_name1}_system
-    #sysproj build -name ${project_name2}_system
-    #append project_name "_system"
-    #sysproj build -name ${project_name}
-    sysproj build -name ${project_name}_system
-}
-
-#updatemem -meminfo ${project_path}/fsbl/_ide/bitstream/${xsa_name}.mmi -data ${project_path}/fsbl/Debug/fsbl.elf -proc system_i/microblaze_0 -bit ${project_path}/fsbl/_ide/bitstream/${xsa_name}.bit -out ${project_path}/fsbl/_ide/bitstream/download.bit -force
-#exec mkdir -p ${project_path}/fsbl/_ide/flash
-#exec echo -e "the_ROM_image:\n{\n$PWD/download.bit\n}\n" > ${project_path}/fsbl/_ide/flash/bootimage.bif
-#exec bootgen -arch fpga -image ${project_path}/fsbl/_ide/flash/bootimage.bif -w -o ${project_path}/fsbl/_ide/flash/BOOT.bin -interface spi 
-
-#exec cp ./src/${bootloader_name}/_ide/bitstream/* ${bootloader_name}/fsbl/_ide/bitstream/
-#exec cp ./src/${project_name}/_ide/bitstream/* ${project_path}/fsbl/_ide/bitstream/
-
 exit
+######

@@ -200,7 +200,7 @@ app create -name ${project_name} -platform ${platform_name} -domain ${domain_nam
 #app config -name ${bootloader1_name} define-compiler-symbols FSBL_DEBUG
 #app config -name ${bootloader2_name} define-compiler-symbols FSBL_DEBUG
 #app config -name ${project_name} -add libraries m
-app config -name ${project_name} -set linker-misc {-Wl,-Map,${ProjName}.map}
+app config -name ${project_name} -add linker-misc {-Wl,-Map,${ProjName}.map}
 
 #importe the app src files
 puts "importe the app src files"
