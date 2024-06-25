@@ -118,6 +118,8 @@ domain active ${domain_name}
 #bsp config stdout psu_uart_1
 
 domain active ${domain_name}
+#bsp config stdin psu_uart_0
+#bsp config stdout psu_uart_0
 bsp config stdin axi_uartlite_0
 bsp config stdout axi_uartlite_0
 #bsp config stdin processer_ss_axi_uartlite_0
