@@ -31,6 +31,8 @@
 #include <xil_printf.h>
 #include <xspi.h>
 #include <xparameters.h>
+#include <xhwicap.h>
+#include "xuartlite_l.h"
 #define VERBOSE
 //#define DEBUG_ELF_LOADER
 
@@ -42,6 +44,9 @@
 #include "elf32.h"
 #include "eb-config.h"
 
+#define XUartLite_IsTransmitEmpty(BaseAddress) \
+	((XUartLite_GetStatusReg((BaseAddress)) & XUL_SR_TX_FIFO_EMPTY) == \
+		XUL_SR_TX_FIFO_EMPTY)
 
 static XSpi Spi;
 static u8 ReadBuffer[EFFECTIVE_READ_BUFFER_SIZE + SPI_VALID_DATA_OFFSET];
@@ -58,11 +63,18 @@ void _hw_exception_handler() {}
 #endif
 
 #if !defined (QFLASH_LE_16MB)
-void FlashEnterExit4BAddMode(XSpi *QspiPtr)
+void FlashEnterExit4BAddMode(XSpi *QspiPtr, unsigned int Enable)
 {
 	u8 WriteDisableCmd = { WRITE_DISABLE_CMD };
 	u8 WriteEnableCmd = { WRITE_ENABLE_CMD };
 	u8 Cmd = { ENTER_4B_ADDR_MODE };
+
+	if(Enable) {
+		Cmd = ENTER_4B_ADDR_MODE;
+	} else {
+		Cmd = EXIT_4B_ADDR_MODE;
+	}
+
 	XSpi_Transfer(QspiPtr, &WriteEnableCmd, NULL, sizeof(WriteEnableCmd));
 	XSpi_Transfer(QspiPtr, &Cmd, NULL, sizeof(Cmd));
 	XSpi_Transfer(QspiPtr, &WriteDisableCmd, NULL, sizeof(WriteDisableCmd));
@@ -86,8 +98,9 @@ int spi_flash_read(XSpi *InstancePtr, u32 FlashAddress, u8 *RecvBuffer, unsigned
 	RecvBuffer[3] = (FlashAddress >> 8) & 0xFF;
 	RecvBuffer[4] = FlashAddress & 0xFF;
 #endif // 	
+
 #if defined (QFLASH_LE_16MB)
-		FlashEnterExit4BAddMode(&Spi);
+		FlashEnterExit4BAddMode(&Spi, 0);
 #endif // #if defined (QFLASH_LE_16MB)
 
 	return XSpi_Transfer(InstancePtr, RecvBuffer, RecvBuffer, ByteCount + SPI_VALID_DATA_OFFSET);
@@ -116,6 +129,212 @@ int spi_flash_read(XSpi *InstancePtr, u32 FlashAddress, u8 *RecvBuffer, unsigned
 //}
 //#endif // VERBOSE
 
+
+/*****************************************************************************/
+/**
+*
+* This function issues IPROG to the target device.
+*
+* @param	iprog_address is the Jump address for the ICAP
+* @param	BaseAddress is the base address of the HwIcap instance.
+* @return	XST_SUCCESS if successful, otherwise XST_FAILURE
+*
+* @note		None
+*
+******************************************************************************/
+int WATCHDOG_TIMER_CFG(u32 timer_value)
+{
+//	int Status;
+	u32 Index;
+	u32 Retries;
+
+	// ref to xapp1247 table 3
+	u32 SendtoFIFO[12] =
+	{
+		0xFFFFFFFF, /* Dummy Word */
+		0x000000BB, /* Bus width auto detect, word 1 */
+		0x11220044, /* Bus width auto detect, word 2 */
+		0xFFFFFFFF, /* Dummy Word */
+		0xFFFFFFFF, /* Dummy Word */
+		0xAA995566, /* Sync Word*/
+		0x20000000, /* Type 1 NO OP */
+		0x20000000, /* Type 1 NO OP  */
+		0x30022001, /* Packet Type 1 command: Write TIMER register */
+		0x00FFFFFF, /* Timer Register value. This enables TIMER_CFG and sets the TIMER value */
+		0x20000000, /* Type 1 NO OP  */
+		0x20000000, /* Type 1 NO OP  */
+	};
+	SendtoFIFO[9] = timer_value; //Load the Warm Boot Address
+
+
+	/*
+	 * Write command sequence to the FIFO
+	 */
+	for (Index = 0; Index < 12; Index++) {
+		XHwIcap_WriteReg(XPAR_HWICAP_0_BASEADDR, XHI_WF_OFFSET, SendtoFIFO[Index]);
+	}
+
+	/*
+	 * Start the transfer of the data from the FIFO to the ICAP device.
+	 */
+	XHwIcap_WriteReg(XPAR_HWICAP_0_BASEADDR, XHI_CR_OFFSET, XHI_CR_WRITE_MASK);
+
+	/*
+	 * Poll for done, which indicates end of transfer
+	 */
+	Retries = 0;
+	while ((XHwIcap_ReadReg(XPAR_HWICAP_0_BASEADDR, XHI_SR_OFFSET) &
+			XHI_SR_DONE_MASK) != XHI_SR_DONE_MASK) {
+		Retries++;
+		if (Retries > XHI_MAX_RETRIES) {
+
+			/*
+			 * Waited to long. Exit with error.
+			 */
+			printf("\r\nHwIcapLowLevelExample failed- retries  \
+			failure. \r\n\r\n");
+
+			return XST_FAILURE;
+		}
+	}
+
+	/*
+	 * Wait till the Write bit is cleared in the CR register.
+	 */
+	while ((XHwIcap_ReadReg(XPAR_HWICAP_0_BASEADDR, XHI_CR_OFFSET)) &
+					XHI_CR_WRITE_MASK);
+	/*
+	 * Write to the SIZE register. We want to readback one word.
+	 */
+	XHwIcap_WriteReg(XPAR_HWICAP_0_BASEADDR, XHI_SZ_OFFSET, 1);
+
+
+	/*
+	 * Start the transfer of the data from ICAP to the FIFO.
+	 */
+	XHwIcap_WriteReg(XPAR_HWICAP_0_BASEADDR, XHI_CR_OFFSET, XHI_CR_READ_MASK);
+
+	/*
+	 * Poll for done, which indicates end of transfer
+	 */
+	Retries = 0;
+	while ((XHwIcap_ReadReg(XPAR_HWICAP_0_BASEADDR, XHI_SR_OFFSET) &
+			XHI_SR_DONE_MASK) != XHI_SR_DONE_MASK) {
+		Retries++;
+		if (Retries > XHI_MAX_RETRIES) {
+
+			/*
+			 * Waited too long. Exit with error.
+			 */
+
+			return XST_FAILURE;
+		}
+	}
+
+
+	return XST_SUCCESS;
+}
+
+/*****************************************************************************/
+/**
+*
+* This function issues IPROG to the target device.
+*
+* @param	iprog_address is the Jump address for the ICAP
+* @param	BaseAddress is the base address of the HwIcap instance.
+* @return	XST_SUCCESS if successful, otherwise XST_FAILURE
+*
+* @note		None
+*
+******************************************************************************/
+int ISSUE_IPROG(u32 iprog_address)
+{
+//	int Status;
+	u32 Index;
+	u32 Retries;
+
+	u32 SendtoFIFO[8] =
+	{
+		0xFFFFFFFF, /* Dummy Word */
+		0xAA995566, /* Sync Word*/
+		0x20000000, /* Type 1 NO OP */
+		0x30020001, /* Write WBSTAR cmd */
+		0x00800000, /* Warm boot start address (Load the desired address) */
+		0x30008001, /* Write CMD */
+		0x0000000F, /* Write IPROG */
+		0x20000000, /* Type 1 NO OP  */
+	};
+	SendtoFIFO[4] = iprog_address; //Load the Warm Boot Address
+
+
+	/*
+	 * Write command sequence to the FIFO
+	 */
+	for (Index = 0; Index < 8; Index++) {
+		XHwIcap_WriteReg(XPAR_HWICAP_0_BASEADDR, XHI_WF_OFFSET, SendtoFIFO[Index]);
+	}
+
+	/*
+	 * Start the transfer of the data from the FIFO to the ICAP device.
+	 */
+	XHwIcap_WriteReg(XPAR_HWICAP_0_BASEADDR, XHI_CR_OFFSET, XHI_CR_WRITE_MASK);
+
+	/*
+	 * Poll for done, which indicates end of transfer
+	 */
+	Retries = 0;
+	while ((XHwIcap_ReadReg(XPAR_HWICAP_0_BASEADDR, XHI_SR_OFFSET) &
+			XHI_SR_DONE_MASK) != XHI_SR_DONE_MASK) {
+		Retries++;
+		if (Retries > XHI_MAX_RETRIES) {
+
+			/*
+			 * Waited to long. Exit with error.
+			 */
+			printf("\r\nHwIcapLowLevelExample failed- retries  \
+			failure. \r\n\r\n");
+
+			return XST_FAILURE;
+		}
+	}
+
+	/*
+	 * Wait till the Write bit is cleared in the CR register.
+	 */
+	while ((XHwIcap_ReadReg(XPAR_HWICAP_0_BASEADDR, XHI_CR_OFFSET)) &
+					XHI_CR_WRITE_MASK);
+	/*
+	 * Write to the SIZE register. We want to readback one word.
+	 */
+	XHwIcap_WriteReg(XPAR_HWICAP_0_BASEADDR, XHI_SZ_OFFSET, 1);
+
+
+	/*
+	 * Start the transfer of the data from ICAP to the FIFO.
+	 */
+	XHwIcap_WriteReg(XPAR_HWICAP_0_BASEADDR, XHI_CR_OFFSET, XHI_CR_READ_MASK);
+
+	/*
+	 * Poll for done, which indicates end of transfer
+	 */
+	Retries = 0;
+	while ((XHwIcap_ReadReg(XPAR_HWICAP_0_BASEADDR, XHI_SR_OFFSET) &
+			XHI_SR_DONE_MASK) != XHI_SR_DONE_MASK) {
+		Retries++;
+		if (Retries > XHI_MAX_RETRIES) {
+
+			/*
+			 * Waited too long. Exit with error.
+			 */
+
+			return XST_FAILURE;
+		}
+	}
+
+
+	return XST_SUCCESS;
+}
+
 int main()
 {
 	elf32_hdr hdr;
@@ -128,7 +347,7 @@ int main()
 	 * Disable caches
 	 */
 #if (XPAR_MICROBLAZE_USE_DCACHE == 1)
-	Xil_DCacheInvalidate()
+	Xil_DCacheInvalidate();
 	Xil_DCacheDisable();
 #endif
 #if (XPAR_MICROBLAZE_USE_ICACHE == 1)
@@ -141,6 +360,11 @@ int main()
 	usleep(100000);
 	print("\r\nSPI ELF Bootloader\r\n");
 #endif
+
+	// OK
+//	while(!XUartLite_IsTransmitEmpty(STDOUT_BASEADDRESS));
+//	WATCHDOG_TIMER_CFG(0x4000000F);
+//	ISSUE_IPROG(0);
 
 	/*
 	 * Initialize the SPI controller in polled mode
@@ -208,6 +432,11 @@ int main()
 		}
 	}
 
+	// OK
+//	while(!XUartLite_IsTransmitEmpty(STDOUT_BASEADDRESS));
+//	WATCHDOG_TIMER_CFG(0x4000000F);
+//	ISSUE_IPROG(0);
+
 	XSpi_Start(&Spi);
 	XSpi_IntrGlobalDisable(&Spi);
 
@@ -217,8 +446,13 @@ int main()
 	print(" to RAM\r\n");
 #endif
 
+	// OK
+//	while(!XUartLite_IsTransmitEmpty(STDOUT_BASEADDRESS));
+//	WATCHDOG_TIMER_CFG(0x4000000F);
+//	ISSUE_IPROG(0);
+
 #if !defined (QFLASH_LE_16MB)
-    FlashEnterExit4BAddMode(&Spi);
+    FlashEnterExit4BAddMode(&Spi, 1);
 #endif // #if !defined (QFLASH_LE_16MB)
 
 	usleep(100*1000);
@@ -228,6 +462,11 @@ int main()
 	print(" sizeof(hdr) = ");
 	putnum(sizeof(hdr));
 	print("\r\n");
+
+	// NG
+//	while(!XUartLite_IsTransmitEmpty(STDOUT_BASEADDRESS));
+//	WATCHDOG_TIMER_CFG(0x4000000F);
+//	ISSUE_IPROG(0);
 
 	do
 	{
@@ -276,7 +515,17 @@ int main()
 #ifdef VERBOSE
 		print("Invalid ELF header");
 #endif
-		return -1;
+
+#if !defined (QFLASH_LE_16MB)
+		FlashEnterExit4BAddMode(&Spi, 0);
+#endif // #if !defined (QFLASH_LE_16MB)
+#ifdef VERBOSE
+		while(!XUartLite_IsTransmitEmpty(STDOUT_BASEADDRESS));
+#endif // defined VERBOSE
+
+		WATCHDOG_TIMER_CFG(0x4000000F);
+		ISSUE_IPROG(0);
+//		return -1;
 	}
 
 	/**

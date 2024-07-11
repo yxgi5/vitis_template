@@ -63,6 +63,7 @@
 #define SPI_READ_OPERATION				0x6B
 #define SPI_READ_OPERATION_4B			0x6C
 #define ENTER_4B_ADDR_MODE				0xB7
+#define EXIT_4B_ADDR_MODE				0xE9
 #define WRITE_ENABLE_CMD				0x06
 #define WRITE_DISABLE_CMD				0x04
 
