@@ -35,6 +35,7 @@
 #include "xuartlite_l.h"
 #define VERBOSE
 //#define DEBUG_ELF_LOADER
+//#define JUMP2GOLDEN
 
 //#ifdef VERBOSE
 //#include "xstatus.h"
@@ -519,13 +520,17 @@ int main()
 #if !defined (QFLASH_LE_16MB)
 		FlashEnterExit4BAddMode(&Spi, 0);
 #endif // #if !defined (QFLASH_LE_16MB)
+
 #ifdef VERBOSE
 		while(!XUartLite_IsTransmitEmpty(STDOUT_BASEADDRESS));
 #endif // defined VERBOSE
 
+#ifdef JUMP2GOLDEN
 		WATCHDOG_TIMER_CFG(0x4000000F);
 		ISSUE_IPROG(0);
-//		return -1;
+#endif // defined JUMP2GOLDEN
+		
+		return -1;
 	}
 
 	/**
