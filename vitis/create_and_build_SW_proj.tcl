@@ -140,7 +140,7 @@ bsp config stdout axi_uartlite_0
 #bsp listparams -proc
 #bsp listparams -lib xilisf
 bsp setlib -name xilffs
-bsp config fs_interface 2
+#bsp config fs_interface 2
 #bsp setlib -name lwip211 -ver 1.3
 bsp setlib -name lwip211
 #bsp listparams -lib lwip211
@@ -150,7 +150,7 @@ bsp setlib -name lwip211
 #bsp config memp_n_tcp_seg 1024
 #bsp config pbuf_pool_size 2048
 ##bsp config pbuf_pool_size 4096
-#bsp config tcp_snd_buf 65536
+#bsp config tcp_snd_buf 65535
 #bsp config tcp_wnd 8192
 #bsp listparams -lib lwip211
 
