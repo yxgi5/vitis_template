@@ -115,7 +115,7 @@ domain active ${domain_name}
 
 #domain list
 #bsp -help
-bsp config -append extra_compiler_flags "-O0"
+#bsp config -append extra_compiler_flags "-O0"
 bsp setlib -name xilisf
 bsp config serial_flash_family 5
 bsp regenerate
@@ -140,18 +140,19 @@ bsp config stdout axi_uartlite_0
 #bsp listparams -lib xilisf
 #bsp setlib -name xilffs
 #bsp config fs_interface 2
-##bsp setlib -name lwip211 -ver 1.3
+#bsp setlib -name lwip211 -ver 1.3
 bsp setlib -name lwip211
-##bsp listparams -lib lwip211
-##bsp config mem_size 33554432
-##bsp config memp_n_pbuf 4096
-##bsp config memp_n_tcp_pcb 1024
-##bsp config memp_n_tcp_seg 1024
-##bsp config pbuf_pool_size 2048
-###bsp config pbuf_pool_size 4096
-##bsp config tcp_snd_buf 65535
-##bsp config tcp_wnd 8192
-##bsp listparams -lib lwip211
+#bsp listparams -lib lwip211
+#bsp config mem_size 33554432
+#bsp config memp_n_pbuf 4096
+#bsp config memp_n_tcp_pcb 1024
+#bsp config memp_n_tcp_seg 1024
+#bsp config pbuf_pool_size 4096
+#bsp config tcp_snd_buf 65535
+#bsp config tcp_wnd 8192
+#bsp config n_rx_descriptors 512
+#bsp config n_tx_descriptors 512
+#bsp listparams -lib lwip211
 
 #importprojects ${project_path}/${platform_name}
 
