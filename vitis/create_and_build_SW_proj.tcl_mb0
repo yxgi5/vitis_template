@@ -143,7 +143,7 @@ bsp config stdout axi_uartlite_0
 #bsp setlib -name lwip211 -ver 1.3
 bsp setlib -name lwip211
 #bsp listparams -lib lwip211
-#bsp config mem_size 33554432
+#bsp config mem_size 524288
 #bsp config memp_n_pbuf 4096
 #bsp config memp_n_tcp_pcb 1024
 #bsp config memp_n_tcp_seg 1024
